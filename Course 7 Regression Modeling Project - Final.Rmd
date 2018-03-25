@@ -1,0 +1,122 @@
+---
+title: "Regression Models Course 7 Project"
+author: "Ed Loessi"
+date: "March 24, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+```
+
+## JHU Regression Models Course 7 - Peer Graded Project
+
+## Introduction - Executive Summary
+
+In this project I am utilizing data from the 1974 Motor Trend Magazine Study covering 32 vehicles. The purpose of this particular analysis is to determine which type of transmission is better for higher gas mileage, an automatic transmission, or a manual transmission, and to build a best fit model comparing the two transmissions and other important variables. In completing this analysis, I performed basic exploratory, tested a few linear models, and utilized a stepwise model to determine the best combination of variables to determine a vehicle's MPG.  The final analysis showed that the MPG for a vehicle is in fact higher when equipped with a manual transmission and that a model that contains the weight of the vehicle, its quarter-mile race time, and its transmission type will allow you to explain approximately 85% using the Multiple R-squared.
+
+## Load the initial dataset
+
+The first step is to load the dataset and create factors for the vs and am variables for future processing.
+
+```{r}
+data(mtcars)
+mtcars$vs <- as.factor(mtcars$vs)
+mtcars$am <- as.factor(mtcars$am)
+```
+
+## Summarize and review the data
+
+The next step is to look through the number of observations of which there are 32 and the number or variables of which there are 11. Additional I ran a pairs comparison to test the connections that the variables show between eachother. Note - the Appendix (Figure 1) contains the pairs grid.
+
+## Observations and Variables
+
+You can see the breakout of the variables as well as a number of the observations. 
+
+```{r}
+str(mtcars)
+```
+
+## Key statistical summary
+
+The summary can be reviewed to better understand some of the key statistical data.
+
+```{r}
+summary(mtcars)
+```
+
+## Automatic vs Manual Transmission Plotting
+
+I ran an initial boxplot to see what the differences were between a manual and automatic transmission regarding MPG. The boxplot shows that the manual transmission performs better in terms of having a higher MPG.
+
+```{r}
+boxplot(mpg ~ am, data = mtcars,
+         col  = c("dark green", " dark blue"),
+         xlab = "Miles per Gallon",
+         ylab = "Transmission Type",
+         main = "Miles Per Gallon by Type of Transmission",
+         names= c("automatic trans","manual trans"),
+         horizontal= T) 
+```
+
+## T-test for the automatic vs. manual transmissions
+
+The t-test below renders a p-value of 0.001374 which is < 0.05 the standard marker for significance meaning that there is a difference between the two transmissions when measured against the dependent variable of MPG. 
+
+```{r}
+auto=subset(mtcars,select=mpg,am==0)
+manual=subset(mtcars,select=mpg,am==1)
+t.test(auto,manual)
+```
+
+## Trial a series of linear regression models
+
+In the next several steps I used a simple regression model to understand the mpg and transmission relationship, then a multivariate model to understand all of the variables in relation to the mpg, then a stepwise regression to choose the best variables to combine to determine mpg.
+
+### Simple Regression model
+
+The simple regression model below shows that the manual transmission would be expected to outperform the automatic transmission by 7.24 miles per gallon given no other variables to consider and that it would explain 36% of the variance.
+
+```{r}
+regSIM <- lm(mpg~am,mtcars) 
+summary(regSIM) 
+```
+
+### Multivariate model
+
+The multivariate model takes into account all variables. However in this model the manual transmission only outperforms the automatice transmission by 2.5 miles per gallon. This model explains 86% of the variance. However, in this model many of the variables are not significant.
+
+```{r}
+regTOT <- lm(mpg~.,mtcars)
+summary(regTOT)
+```
+
+### Stepwise regression
+
+In order to find the best set of variables I used the stepwise model below. The variables of weight, quarter-mile race time, and transmission type when combined provide the strongest model while explaining 85% of the variance. In this model, the manual transmission outperforms the automatic transmission by 2.93 miles per gallon.
+
+```{r}
+regSR=step(regTOT,trace=0)
+summary(regSR)
+```
+## Final Analysis
+
+The final model above shows that weight, quarter-mile race time, and transmission type are all statistically significant regarding the MPG. This model shows that the MPG when all other factors are held constant will improve by 2.93 miles per gallon over the automatic transmission, which answers the original question of which transmission is better for a higher MPG (manual transmission).
+
+## Appendix
+
+### Graph 1 - Pairs Analysis
+
+```{r}
+pairs(mtcars)
+```
+
+### Graph 2 - Residuals Analysis
+
+```{r}
+plot(regSR, which=c(1:1))
+```
+
